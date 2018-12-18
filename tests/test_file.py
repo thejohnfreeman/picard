@@ -1,7 +1,8 @@
 """Tests for file states."""
 
-import picard
+import asyncio
 
+import picard
 
 @picard.file('output.txt')
 async def output(context, inputs):
@@ -10,4 +11,4 @@ async def output(context, inputs):
 
 
 def test_file_returns_filename():
-    assert picard.get(output) == 'output.txt'
+    assert asyncio.run(picard.sync(output)) == 'output.txt'

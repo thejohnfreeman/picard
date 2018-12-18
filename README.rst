@@ -38,18 +38,23 @@ Picard has a few main components:
 
    import picard
 
+   async def sh(*args, **kwargs):
+       p = await asyncio.create_subprocess_exec(*args, **kwargs)
+       await p.wait()
+
    def object_from_source(source):
-       @picard.file(re.sub('\.c$', '.o', source), [source])
+       """Compile an object file from a source file."""
+       @picard.file(re.sub('\\.c$', '.o', source.name), [source])
        async def object_(context, inputs):
-           await asyncio.create_subprocess_exec(['gcc', '-c'] + inputs)
+           await sh('gcc', '-c', *inputs)
        return object_
 
-   sources = ['hello.c']
+   sources = [picard.state('hello.c')]
    objects = [object_from_source(s) for s in sources]
 
    @picard.file('hello', objects)
    async def hello(context, inputs):
-       await asyncio.create_subprocess_exec(['gcc', '-o', 'hello'] + inputs)
+       await sh('gcc', '-o', 'hello', *inputs)
 
    if __name__ == '__main__':
-       picard.main()
+       picard.main(hello)

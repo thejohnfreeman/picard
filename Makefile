@@ -6,6 +6,8 @@ lint :
 
 test :
 	pytest
-	rm -f hello
+	@rm -f hello*
+	python tests/hello.py --help
 	python tests/hello.py
 	./hello
+	@rm -f hello*
