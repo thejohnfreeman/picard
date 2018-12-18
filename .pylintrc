@@ -1,0 +1,6 @@
+[BASIC]
+docstring-min-length = 4
+good-names = f,T
+disable = fixme,redefined-outer-name
+# Data classes are fine.
+min-public-methods = 0

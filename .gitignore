@@ -1,3 +1,4 @@
 /picard.egg-info/
 /poetry.lock
 __pycache__/
+.mypy_cache/
