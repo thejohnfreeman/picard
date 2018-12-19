@@ -49,12 +49,16 @@ Picard has a few main components:
            await sh('gcc', '-c', *inputs)
        return object_
 
+   # Start with one source file, which we expect to exist.
    sources = [picard.state('hello.c')]
+   # Compute object files from source files.
    objects = [object_from_source(s) for s in sources]
 
+   # Link all object files into one executable.
    @picard.file('hello', objects)
    async def hello(context, inputs):
        await sh('gcc', '-o', 'hello', *inputs)
 
+   # Select a target on the command line, using "hello" as the default.
    if __name__ == '__main__':
        picard.main(hello)
