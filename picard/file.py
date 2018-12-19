@@ -4,16 +4,10 @@ import os
 import typing as t
 
 from picard.context import Context
-from picard.typing import State, StateLike
+from picard.rule import RuleState
 
-class FileState(State):
+class FileState(RuleState):
     """A file that must be newer than its input files."""
-
-    def __init__(self, name: str, inputs: t.Collection[StateLike], f) -> None:
-        from picard.state import state # pylint: disable=cyclic-import
-        self.name = name
-        self.dependencies = [state(i) for i in inputs]
-        self.f = f
 
     async def sync(self, context: Context) -> str:
         """Conditionally re-generate this file.
@@ -29,7 +23,10 @@ class FileState(State):
         inputs = await sync(self.dependencies)
         if not await self._is_up_to_date(context, inputs):
             context.log.info(f'start: {self.name}')
-            await self.f(context, self.name, inputs)
+            value = await self.f(context, self.name, inputs)
+            if value is not None:
+                context.log.warning(
+                    f'discarding value returned by {self.f}: {value}')
             if not await self._is_up_to_date(context, inputs):
                 context.log.warning(
                     f'rule failed to update target: {self.name}')
