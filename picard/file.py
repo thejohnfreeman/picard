@@ -1,12 +1,13 @@
 """Make-style file states."""
 
+import os
 import typing as t
 
 from picard.context import Context
 from picard.typing import State, StateLike
 
 class FileState(State):
-    """A file that must have a timestamp newer than its input files."""
+    """A file that must be newer than its input files."""
 
     def __init__(self, name: str, inputs: t.Collection[StateLike], f) -> None:
         from picard.state import state # pylint: disable=cyclic-import
@@ -18,15 +19,38 @@ class FileState(State):
         """Conditionally re-generate this file.
 
         The conditions are (1) if this file does not exist or (2) if its
-        inputs have changed.
+        inputs have changed since it was last touched.
         """
+        # There is no way around evaluating all of the inputs. Either (1) we
+        # must compute the output from the evaluated inputs or (2) we
+        # must check all inputs to make sure none have changed since the
+        # target was last touched.
         from picard.api import sync # pylint: disable=cyclic-import
         inputs = await sync(self.dependencies)
-        # TODO: Check timestamps.
-        context.log.info(f'start: {self.name}')
-        await self.f(context, inputs)
-        context.log.info(f'finish: {self.name}')
+        if not await self._is_up_to_date(context, inputs):
+            context.log.info(f'start: {self.name}')
+            await self.f(context, inputs)
+            context.log.info(f'finish: {self.name}')
         return self.name
+
+    async def _is_up_to_date(
+            self, context: Context, inputs: t.Iterable[t.Any]):
+        try:
+            mtime = os.stat(self.name).st_mtime
+        except FileNotFoundError:
+            return False
+
+        for input_ in inputs:
+            if not isinstance(input_, str):
+                # Not a filename.
+                context.log.warn(
+                    f'skipping non-filename dependency: {input_}')
+                continue
+            if os.stat(input_).st_mtime > mtime:
+                # Input has been modified after output.
+                return False
+
+        return True
 
 
 def file(output: str, inputs=tuple()):

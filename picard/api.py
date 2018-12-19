@@ -13,7 +13,20 @@ from picard.typing import StateLike
 async def sync(
         arg: t.Union[StateLike, t.Iterable[StateLike]],
         context: t.Union[Context, None] = None):
-    """Swiss-army function to synchronize one or more states."""
+    """Swiss-army function to synchronize one or more states.
+
+    Parameters
+    ----------
+    arg :
+        One or more states.
+    context :
+        An optional context. If ``None`` is passed (the default), one will be
+        created for you.
+
+    Returns
+    -------
+    The value(s) of the states.
+    """
     if context is None:
         context = Context()
     if isinstance(arg, t.Iterable):
