@@ -27,8 +27,8 @@ Picard has a few main components:
 
 1. An abstract interface for state types to implement.
 2. Decorators to ease the implementation of common patterns of state types.
-3. Out-of-the-box state types for common use cases, e.g. files (a la Make) and
-   Amazon Web Services.
+3. Batteries-included state types for common use cases, e.g. files (a la Make)
+   and Amazon Web Services.
 4. A default command line driver.
 
 .. code-block:: python
@@ -37,10 +37,6 @@ Picard has a few main components:
    import re
 
    import picard
-
-   async def sh(*args, **kwargs):
-       p = await asyncio.create_subprocess_exec(*args, **kwargs)
-       await p.wait()
 
    def source(filename):
        """Compute header file dependencies from source file."""

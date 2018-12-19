@@ -6,9 +6,9 @@ Compiles an executable from an object file from a source file.
 # pylint: disable=missing-docstring,unused-argument,invalid-name
 
 import asyncio
-import re
 
 import picard
+import picard.clang as clang
 
 code = """
 #include <stdio.h>
@@ -24,15 +24,6 @@ async def sh(*args, **kwargs):
     await p.wait()
 
 
-def object_from_source(source):
-    """Compile an object file from a source file."""
-    source = picard.state(source)
-    @picard.file(re.sub('\\.c$', '.o', source.name), [source])
-    async def object_(context, output, inputs):
-        await sh('gcc', '-c', *inputs)
-    return object_
-
-
 @picard.file('hello.c')
 async def source(context, output, inputs):
     with open('hello.c', 'w') as file:
@@ -40,12 +31,8 @@ async def source(context, output, inputs):
 
 
 sources = [source]
-objects = [object_from_source(s) for s in sources]
-
-
-@picard.file('hello', objects)
-async def hello(context, output, inputs):
-    await sh('gcc', '-o', output, *inputs)
+objects = clang.objects(sources)
+hello = clang.executable('hello', objects)
 
 
 if __name__ == '__main__':
