@@ -5,6 +5,9 @@ picard
 Make it so.
 ------
 
+.. image:: https://travis-ci.org/thejohnfreeman/picard.svg?branch=master
+    :target: https://travis-ci.org/thejohnfreeman/picard
+
 The idea of Ansible with the execution of Make.
 
 Start with what I call a "state declaration", e.g. "executable X is built from
