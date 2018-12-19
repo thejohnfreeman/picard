@@ -13,8 +13,5 @@ def state(arg: StateLike) -> State:
         return arg
     if isinstance(arg, str):
         # Treat ``arg`` as a filename.
-        async def noop(context, inputs):
-            # pylint: disable=unused-argument
-            pass
-        return file(arg)(noop)
+        return file(arg)()
     raise Exception(f'not a state: {arg}')

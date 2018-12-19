@@ -42,15 +42,21 @@ Picard has a few main components:
        p = await asyncio.create_subprocess_exec(*args, **kwargs)
        await p.wait()
 
+   def source(filename):
+       """Compute header file dependencies from source file."""
+       headers = [picard.state(h) for h in find_headers(filename)]
+       return picard.file(filename, headers)()
+
    def object_from_source(source):
        """Compile an object file from a source file."""
+       source = picard.state(source)
        @picard.file(re.sub('\\.c$', '.o', source.name), [source])
        async def object_(context, inputs):
            await sh('gcc', '-c', *inputs)
        return object_
 
    # Start with one source file, which we expect to exist.
-   sources = [picard.state('hello.c')]
+   sources = [source('hello.c')]
    # Compute object files from source files.
    objects = [object_from_source(s) for s in sources]
 

@@ -26,14 +26,15 @@ async def sh(*args, **kwargs):
 
 def object_from_source(source):
     """Compile an object file from a source file."""
+    source = picard.state(source)
     @picard.file(re.sub('\\.c$', '.o', source.name), [source])
-    async def object_(context, inputs):
+    async def object_(context, output, inputs):
         await sh('gcc', '-c', *inputs)
     return object_
 
 
 @picard.file('hello.c')
-async def source(context, inputs):
+async def source(context, output, inputs):
     with open('hello.c', 'w') as file:
         file.write(code)
 
@@ -43,8 +44,8 @@ objects = [object_from_source(s) for s in sources]
 
 
 @picard.file('hello', objects)
-async def hello(context, inputs):
-    await sh('gcc', '-o', 'hello', *inputs)
+async def hello(context, output, inputs):
+    await sh('gcc', '-o', output, *inputs)
 
 
 if __name__ == '__main__':

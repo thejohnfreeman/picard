@@ -29,7 +29,10 @@ class FileState(State):
         inputs = await sync(self.dependencies)
         if not await self._is_up_to_date(context, inputs):
             context.log.info(f'start: {self.name}')
-            await self.f(context, inputs)
+            await self.f(context, self.name, inputs)
+            if not await self._is_up_to_date(context, inputs):
+                context.log.warning(
+                    f'rule failed to update target: {self.name}')
             context.log.info(f'finish: {self.name}')
         return self.name
 
@@ -53,9 +56,18 @@ class FileState(State):
         return True
 
 
+async def _touch(
+        context: Context, output: str, inputs: t.Iterable[t.Any]) -> None:
+    # pylint: disable=unused-argument
+    open(output, 'a').close()
+    os.utime(output)
+
+
 def file(output: str, inputs=tuple()):
     """A file that is younger than its input files."""
     # pylint: disable=unused-argument
-    def decorator(f):
+    # We need the default to be touch so that the timestamp is updated.
+    def decorator(
+            f: t.Callable[[Context, str, t.Iterable[t.Any]], t.Any] = _touch):
         return FileState(output, inputs, f)
     return decorator
