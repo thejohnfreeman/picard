@@ -3,7 +3,7 @@ python:
   - 3.7-dev
 install:
   - pip install poetry
-  - poetry install
+  - poetry install --extras aws
 script:
   - make lint
   - make test
