@@ -26,7 +26,7 @@ async def sh(*args, **kwargs):
 
 
 @picard.file('hello.c')
-async def source(context, output, inputs):
+async def source(context, self, inputs):
     with open('hello.c', 'w') as file:
         file.write(code)
 

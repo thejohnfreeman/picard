@@ -5,7 +5,7 @@ import asyncio
 import picard
 
 @picard.file('output.txt')
-async def output(context, output, inputs):
+async def output(context, self, inputs):
     # pylint: disable=unused-argument
     pass
 

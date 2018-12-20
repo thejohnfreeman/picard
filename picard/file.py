@@ -4,7 +4,8 @@ import os
 import typing as t
 
 from picard.context import Context
-from picard.rule import RuleState
+from picard.rule import RuleState, RuleFunction
+from picard.typing import State
 
 class FileState(RuleState):
     """A file that must be newer than its input files."""
@@ -23,10 +24,10 @@ class FileState(RuleState):
         inputs = await sync(self.dependencies)
         if not await self._is_up_to_date(context, inputs):
             context.log.info(f'start: {self.name}')
-            value = await self.f(context, self.name, inputs)
+            value = await self.function(context, self, inputs)
             if value is not None:
                 context.log.warning(
-                    f'discarding value returned by {self.f}: {value}')
+                    f'discarding value returned by {self.function}: {value}')
             if not await self._is_up_to_date(context, inputs):
                 context.log.warning(
                     f'rule failed to update target: {self.name}')
@@ -54,8 +55,9 @@ class FileState(RuleState):
 
 
 async def _touch(
-        context: Context, output: str, inputs: t.Iterable[t.Any]) -> None:
+        context: Context, state: State, inputs: t.Iterable[t.Any]) -> None:
     # pylint: disable=unused-argument
+    output = state.name
     open(output, 'a').close()
     os.utime(output)
 
@@ -64,7 +66,6 @@ def file(output: str, inputs=tuple()):
     """A file that is younger than its input files."""
     # pylint: disable=unused-argument
     # We need the default to be touch so that the timestamp is updated.
-    def decorator(
-            f: t.Callable[[Context, str, t.Iterable[t.Any]], t.Any] = _touch):
-        return FileState(output, inputs, f)
+    def decorator(function: RuleFunction = _touch):
+        return FileState(output, inputs, function)
     return decorator
