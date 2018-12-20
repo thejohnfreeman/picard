@@ -5,7 +5,6 @@ import typing_extensions as tex
 
 from picard.context import Context
 
-
 T = t.TypeVar('T', covariant=True)
 
 

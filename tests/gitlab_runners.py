@@ -10,4 +10,4 @@ kp = aws.key_pair('gitlab-runners-key')
 # instance. Do this out-of-band from the provisioning.
 
 if __name__ == '__main__':
-    picard.main(kp)
+    picard.main(sg)

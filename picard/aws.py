@@ -9,14 +9,20 @@ identify the resource in a search.
 
 import boto3 # type: ignore
 
-from picard.rule import rule
+from picard.abc import AbstractState, log_to_context
+from picard.context import Context
 
-def security_group(name, description=''):
+class SecurityGroupState(AbstractState):
     """An AWS security group."""
 
-    @rule(name=name)
-    async def security_group(context, self, inputs):
-        # pylint: disable=unused-argument
+    def __init__(self, name: str, description=''):
+        super().__init__(name)
+        self.description = description
+
+    @log_to_context()
+    async def sync(self, context: Context):
+        name = self.name
+        description = self.description
 
         # Search for the security group by name.
         client = boto3.client('ec2')
@@ -49,21 +55,17 @@ def security_group(name, description=''):
             Description=description)
         return ec2.SecurityGroup(response['GroupId'])
 
-    return security_group
+
+security_group = SecurityGroupState
 
 
-def key_pair(name):
-    """An AWS key pair.
+class KeyPairState(AbstractState):
+    """An AWS key pair."""
 
-    Parameters
-    ----------
-    name :
-        A name for the key pair.
-    """
-
-    @rule(name=name)
-    async def key_pair(context, self, inputs):
+    @log_to_context()
+    async def sync(self, context: Context):
         # pylint: disable=unused-argument
+        name = self.name
 
         # Search for the key pair by name.
         client = boto3.client('ec2')
@@ -84,4 +86,5 @@ def key_pair(name):
         return ec2.KeyPair(name)
         # Can we get the key material *after* the key has been created?
 
-    return key_pair
+
+key_pair = KeyPairState
