@@ -10,28 +10,30 @@ Make it so.
 
 The idea of Ansible with the execution of Make.
 
-Start with what I call a "state declaration", e.g. "executable X is built from
-its sources and is up-to-date" or "there exists a group of running instances
-with this configuration". States may depend on each other, e.g. "the state of
-this instance depends on the state of that security group". Picard is like an
-rsync for these states: it finds the differences between your current state
-and your target state, and executes just the necessary changes to transition
+With Picard, you define a set of targets, each with a recipe that leaves it in
+a desired state, e.g. a compiled executable or a running service. Targets may
+depend on each other, e.g. "this executable depends on that source file" or
+"this service depends on that host". Like Make, Picard executes the recipe for
+each target in dependency order.
+
+Like Ansible, Picard comes with many sophisticated recipes out-of-the-box
+that behave like rsync: they find the differences between a target's present
+state and its goal state, and execute just the changes necessary to transition
 from the first to the second.
 
-In this way, it is much like Ansible or Make. Make is limited to considering
-the state of the local filesystem, while Ansible can consider more general
-states, e.g. the existence and configuration of remote machines. Ansible's
-input is a rigid declarative template (based on Jinja), while Make's input is
-an executable script that builds the abstract definition of the target state
-and gets to leverage functions and variables. Picard tries to combine the best
-of both worlds in pure Python.
+Make is limited to considering targets on the local filesystem, while Ansible
+can consider more general targets and states, e.g. the existence and
+configuration of remote machines. Ansible's input is a rigid declarative
+template (based on Jinja), while Make's input is an executable script that
+builds the abstract definitions of the targets and gets to leverage functions
+and variables. Picard tries to combine the best of both worlds in pure Python.
 
 Picard has a few main components:
 
-1. An abstract interface for state types to implement.
-2. Decorators to ease the implementation of common patterns of state types.
-3. Batteries-included state types for common use cases, e.g. files (a la Make)
-   and Amazon Web Services.
+1. An abstract interface for target types to implement.
+2. Decorators to ease the implementation of common patterns of target types.
+3. Batteries-included target types for common use cases, e.g. files (a la
+   Make) and Amazon Web Services (AWS) resources.
 4. A default command line driver.
 
 .. code-block:: python
@@ -43,12 +45,12 @@ Picard has a few main components:
 
    def source(filename):
        """Compute header file dependencies from source file."""
-       headers = [picard.state(h) for h in find_headers(filename)]
+       headers = [picard.target(h) for h in find_headers(filename)]
        return picard.file(filename, headers)()
 
    def object_from_source(source):
        """Compile an object file from a source file."""
-       source = picard.state(source)
+       source = picard.target(source)
        @picard.file(re.sub('\\.c$', '.o', source.name), [source])
        async def object_(context, inputs):
            await sh('gcc', '-c', *inputs)

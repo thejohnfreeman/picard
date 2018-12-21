@@ -1,64 +1,73 @@
-"""Turn a named function into a state."""
+"""Turn a named function into a :class:`Target`.
+
+A target is a combination of a name, a set of prerequisites, and an (async)
+recipe function. Because every async function in Python has a name, we just
+need to add a set of prerequisites to make a rule, which we can do with
+a decorator much easier than defininig a class. :func:`rule` is a function
+decorator to do just that, and it constructs an instance of
+:class:`RuleTarget`.
+"""
 
 import typing as t
 
 from picard.context import Context
-from picard.typing import State, StateLike
+from picard.typing import Target, TargetLike
 
-RuleFunction = t.Callable[[Context, State, t.Iterable[t.Any]], t.Any]
+Recipe = t.Callable[[Context, Target, t.Iterable[t.Any]], t.Any]
 
-class RuleState(State):
-    """A state built from a named function.
 
-    A state is a combination of a name, a set of dependencies, and an (async)
-    function. Because every async function in Python has a name, we just need
-    to add a set of dependencies to an async function to build a state, which
-    is much easier than defininig a class. :func:`rule` is a function
-    decorator to do just that, and it constructs an instance of this class.
-    """
+class RuleTarget(Target):
+    """A target built from a recipe function."""
 
     def __init__(
             self,
             name: str,
-            inputs: t.Collection[StateLike],
-            function: RuleFunction) -> None:
-        from picard.state import state # pylint: disable=cyclic-import
+            prereqs: t.Collection[TargetLike],
+            recipe: Recipe) -> None:
+        from picard.target import target # pylint: disable=cyclic-import
         self.name = name
-        self.dependencies = [state(i) for i in inputs]
-        self.function = function
+        self.prereqs = [target(p) for p in prereqs]
+        self._recipe = recipe
 
-    async def sync(self, context: Context):
+    async def recipe(self, context: Context):
+        # TODO: Memoize value.
         from picard.api import sync # pylint: disable=cyclic-import
-        inputs = await sync(self.dependencies)
+        prereqs = await sync(self.prereqs)
         context.log.info(f'start: {self.name}')
-        value = await self.function(context, self, inputs)
-        context.log.info(f'finish: {self.name}')
+        value = await self._recipe(context, self, prereqs)
+        context.log.info(f'finish:  {self.name}')
         return value
 
 
-def rule(inputs=tuple(), name=None):
-    """Turn a named function into a state.
+def rule(prereqs: t.Collection[Target] = tuple(), target=None):
+    """Turn a recipe function into a rule.
 
-    The basic principle of every rule is that it establishes a post-condition
-    by the time it exits. It should return the same value whether it needs to
-    "do work" or not, and such work should be performed conditionally on
-    whether the post-condition was met before the rule was entered.
+    We call this decorator ``rule`` because it lets us build targets from
+    recipe functions with a syntax that mimics Make.
+
+    Parameters
+    ----------
+    prereqs :
+        A set of prerequisite targets.
+    target :
+        A name for the target of this recipe. If ``None`` (the default), the
+        name of the recipe function will be used.
 
     Example
     -------
         from pathlib import Path
 
         @rule()
-        async def gitdir():
+        async def gitdir(context, self, prereqs):
             path = Path('.git')
             if not path.is_dir():
                 picard.sh('git', 'init', '.')
             return path
     """
     # pylint: disable=unused-argument
-    def decorator(function: RuleFunction):
-        nonlocal name
-        if name is None:
-            name = function.__name__
-        return RuleState(name, inputs, function)
+    def decorator(function: Recipe):
+        nonlocal target
+        if target is None:
+            target = function.__name__
+        return RuleTarget(target, prereqs, function)
     return decorator

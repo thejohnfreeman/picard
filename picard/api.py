@@ -7,31 +7,32 @@ import logging
 import typing as t
 
 from picard.context import Context
-from picard.state import state
-from picard.typing import StateLike
+from picard.target import target
+from picard.typing import TargetLike
 
 async def sync(
-        arg: t.Union[StateLike, t.Iterable[StateLike]],
+        targets: t.Union[TargetLike, t.Iterable[TargetLike]],
         context: t.Union[Context, None] = None):
-    """Swiss-army function to synchronize one or more states.
+    """Swiss-army function to synchronize one or more targets.
 
     Parameters
     ----------
-    arg :
-        One or more states.
+    targets :
+        One or more targets.
     context :
         An optional context. If ``None`` is passed (the default), one will be
         created for you.
 
     Returns
     -------
-    The value(s) of the states.
+    The value(s) of the targets.
     """
     if context is None:
         context = Context()
-    if isinstance(arg, t.Iterable):
-        return await asyncio.gather(*(state(x).sync(context) for x in arg))
-    return await state(arg).sync(context)
+    if isinstance(targets, t.Iterable):
+        return await asyncio.gather(
+            *(target(t).recipe(context) for t in targets))
+    return await target(targets).recipe(context)
 
 
 def main(default, rules=None):

@@ -1,26 +1,25 @@
 """Batteries for Amazon Web Services.
 
-The states in this module correspond to AWS resources, e.g. an EC2 instance or
+The targets in this module correspond to AWS resources, e.g. an EC2 instance or
 an S3 bucket. That is, their post-condition asserts that the resource exists
-with the given parameters. Each state is requires *at least* the parameters
+with the given parameters. Each target is requires *at least* the parameters
 necessary to create the resource. These parameters should be enough to
 identify the resource in a search.
 """
 
 import boto3 # type: ignore
 
-from picard.abc import AbstractState, log_to_context
 from picard.context import Context
+from picard.abc import AbstractTarget
 
-class SecurityGroupState(AbstractState):
+class SecurityGroupTarget(AbstractTarget):
     """An AWS security group."""
 
     def __init__(self, name: str, description=''):
         super().__init__(name)
         self.description = description
 
-    @log_to_context()
-    async def sync(self, context: Context):
+    async def _recipe(self, context: Context):
         name = self.name
         description = self.description
 
@@ -56,14 +55,13 @@ class SecurityGroupState(AbstractState):
         return ec2.SecurityGroup(response['GroupId'])
 
 
-security_group = SecurityGroupState
+security_group = SecurityGroupTarget
 
 
-class KeyPairState(AbstractState):
+class KeyPairTarget(AbstractTarget):
     """An AWS key pair."""
 
-    @log_to_context()
-    async def sync(self, context: Context):
+    async def _recipe(self, context: Context):
         # pylint: disable=unused-argument
         name = self.name
 
@@ -87,4 +85,4 @@ class KeyPairState(AbstractState):
         # Can we get the key material *after* the key has been created?
 
 
-key_pair = KeyPairState
+key_pair = KeyPairTarget

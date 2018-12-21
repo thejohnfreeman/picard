@@ -4,12 +4,12 @@ import re
 
 from picard.file import file
 from picard.shell import sh
-from picard.state import state
+from picard.target import target
 
 def source(filename):
     """Compute header file dependencies from a source file."""
     # TODO: Implement :func:`find_headers`.
-    # headers = [state(h) for h in find_headers(filename)]
+    # headers = [target(h) for h in find_headers(filename)]
     return file(filename)()
 
 
@@ -19,7 +19,7 @@ def sources(*filenames):
 
 def object_from_source(source):
     """Compile an object file from a source file."""
-    source = state(source)
+    source = target(source)
     @file(re.sub('\\.c$', '.o', source.name), [source])
     async def object_(context, self, inputs):
         # pylint: disable=unused-argument

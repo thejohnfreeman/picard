@@ -1,71 +1,70 @@
-"""Make-style file states."""
+"""Make-style file targets."""
 
 import os
 import typing as t
 
 from picard.context import Context
-from picard.rule import RuleState, RuleFunction
-from picard.typing import State
+from picard.rule import RuleTarget, Recipe
+from picard.typing import Target
 
-class FileState(RuleState):
-    """A file that must be newer than its input files."""
+class FileTarget(RuleTarget):
+    """A file that must be newer than its prerequisite files."""
 
-    async def sync(self, context: Context) -> str:
-        """Conditionally re-generate this file.
+    async def recipe(self, context: Context) -> str:
+        """Conditionally rebuild this file.
 
         The conditions are (1) if this file does not exist or (2) if its
-        inputs have changed since it was last touched.
+        prerequisites have changed since it was last touched.
         """
-        # There is no way around evaluating all of the inputs. Either (1) we
-        # must compute the output from the evaluated inputs or (2) we
-        # must check all inputs to make sure none have changed since the
-        # target was last touched.
+        # There is no way around evaluating all of the prerequisites. Either
+        # (1) some have changed but we must feed them all to the recipe or (2)
+        # we must check all of them to make sure none have changed.
         from picard.api import sync # pylint: disable=cyclic-import
-        inputs = await sync(self.dependencies)
-        if not await self._is_up_to_date(context, inputs):
+        prereqs = await sync(self.prereqs)
+        if not await self._is_up_to_date(context, prereqs):
             context.log.info(f'start: {self.name}')
-            value = await self.function(context, self, inputs)
+            value = await self._recipe(context, self, prereqs)
             if value is not None:
                 context.log.warning(
-                    f'discarding value returned by {self.function}: {value}')
-            if not await self._is_up_to_date(context, inputs):
+                    f'discarding value returned by {self._recipe}: {value}')
+            if not await self._is_up_to_date(context, prereqs):
                 context.log.warning(
                     f'rule failed to update target: {self.name}')
             context.log.info(f'finish: {self.name}')
         return self.name
 
     async def _is_up_to_date(
-            self, context: Context, inputs: t.Iterable[t.Any]):
+            self, context: Context, prereqs: t.Iterable[t.Any]):
         try:
             mtime = os.stat(self.name).st_mtime
         except FileNotFoundError:
             return False
 
-        for input_ in inputs:
-            if not isinstance(input_, str):
+        for prereq in prereqs:
+            if not isinstance(prereq, str):
                 # Not a filename.
                 context.log.warn(
-                    f'skipping non-filename dependency: {input_}')
+                    f'skipping non-filename dependency: {prereq}')
                 continue
-            if os.stat(input_).st_mtime > mtime:
-                # Input has been modified after output.
+            if os.stat(prereq).st_mtime > mtime:
+                # Prerequisite has been modified after target.
                 return False
 
         return True
 
 
 async def _touch(
-        context: Context, state: State, inputs: t.Iterable[t.Any]) -> None:
+        context: Context, target: Target, prereqs: t.Iterable[t.Any]) -> None:
     # pylint: disable=unused-argument
-    output = state.name
-    open(output, 'a').close()
-    os.utime(output)
+    filename = target.name
+    open(filename, 'a').close()
+    os.utime(filename)
 
 
-def file(output: str, inputs=tuple()):
-    """A file that is younger than its input files."""
+def file(target: str, prereqs=tuple()):
+    """A file that is newer than its prerequisite files."""
     # pylint: disable=unused-argument
     # We need the default to be touch so that the timestamp is updated.
-    def decorator(function: RuleFunction = _touch):
-        return FileState(output, inputs, function)
+    def decorator(recipe: Recipe = _touch):
+        return FileTarget(target, prereqs, recipe)
     return decorator

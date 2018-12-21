@@ -2,9 +2,9 @@
 
 from picard.api import main, sync
 from picard.context import Context
-# I'm only slightly worried about the rebindings of ``file`` and ``state``...
-from picard.file import FileState, file
+# I'm only slightly worried about the rebindings of ``file`` and ``target``...
+from picard.file import FileTarget, file
 from picard.rule import rule
 from picard.shell import sh
-from picard.state import state
-from picard.typing import State, StateLike
+from picard.target import target
+from picard.typing import Target, TargetLike

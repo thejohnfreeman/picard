@@ -1,8 +1,8 @@
-"""Context shared by the state graph.
+"""Context shared through the dependency graph.
 
-Context makes it possible to pass information "up" the state graph (or "down",
-depending on your perspective), from dependents to dependencies. It generally
-carries a configuration and a shared logger.
+Context makes it possible to pass information "up" the dependency graph (or
+"down", depending on your perspective), from targets to prerequisites. It
+generally carries a configuration and a shared logger.
 """
 
 import logging

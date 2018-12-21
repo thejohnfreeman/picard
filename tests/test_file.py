@@ -1,4 +1,4 @@
-"""Tests for file states."""
+"""Tests for file targets."""
 
 import asyncio
 

@@ -1,37 +1,30 @@
-"""An abstract base state class."""
+"""An abstract base target class."""
 
 import abc
-import functools
 import typing as t
 
 from picard.context import Context
-from picard.typing import State, StateLike
+from picard.typing import Target, TargetLike
 
-T = t.TypeVar('T', covariant=True)
-
-
-class AbstractState(abc.ABC, State[T]):
-    """An abstract state."""
+class AbstractTarget(abc.ABC, Target):
+    """An abstract target."""
 
     def __init__(
-            self, name: str, inputs: t.Collection[StateLike] = tuple()):
-        from picard.state import state # pylint: disable=cyclic-import
+            self, name: str, prereqs: t.Collection[TargetLike] = tuple()):
+        from picard.target import target # pylint: disable=cyclic-import
         self.name = name
-        self.dependencies = [state(i) for i in inputs]
+        self.prereqs = [target(p) for p in prereqs]
+
+    async def recipe(self, context: Context):
+        """Build the target from its prerequisites."""
+        # This implementation logs its entry and exit and memoizes its result.
+        # TODO: Memoize result.
+        context.log.info(f'start: {self.name}')
+        value = await self._recipe(context)
+        context.log.info(f'finish: {self.name}')
+        return value
 
     @abc.abstractmethod
-    async def sync(self, context: Context) -> T:
-        raise NotImplementedError()
-
-
-def log_to_context():
-    """Log to the context when entering and exiting a sync function."""
-    def decorator(function):
-        @functools.wraps(function)
-        async def sync(self, context: Context, *args, **kwargs):
-            context.log.info(f'start: {self.name}')
-            value = await function(self, context, *args, **kwargs)
-            context.log.info(f'finish: {self.name}')
-            return value
-        return sync
-    return decorator
+    async def _recipe(self, context: Context):
+        # pylint: disable=unused-argument,pointless-statement
+        ...

@@ -4,3 +4,4 @@ good-names = f,T
 disable = fixme,redefined-outer-name,invalid-name
 # Data classes are fine.
 min-public-methods = 0
+ignore-long-lines = https?://
