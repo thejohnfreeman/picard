@@ -33,27 +33,27 @@ class SecurityGroupTarget(AbstractTarget):
             # TODO: Set the description.
             raise Exception(f'ambiguous security group name: {name}')
 
-        # Exactly one? Check for differences, then return it.
-        ec2 = boto3.resource('ec2')
-        if len(groups) == 1:
-            group = groups[0]
-            gid = group['GroupId']
-            actual = group['Description']
-            if actual != description:
-                context.log.warning(
-                    f'description for security group {name} '
-                    f'(#{gid}) does not match:\n'
-                    f'expected: {description}\n'
-                    f'actual: {actual}'
-                )
-            return ec2.SecurityGroup(gid)
-
         # None? We must create it.
-        response = client.create_security_group(
-            GroupName=name,
-            Description=description)
-        return ec2.SecurityGroup(response['GroupId'])
+        ec2 = boto3.resource('ec2')
+        if not groups:
+            response = client.create_security_group(
+                GroupName=name,
+                Description=description)
+            return ec2.SecurityGroup(response['GroupId'])
 
+        # Exactly one? Check for differences, then return it.
+        assert len(groups) == 1
+        group = groups[0]
+        gid = group['GroupId']
+        actual = group['Description']
+        if actual != description:
+            context.log.warning(
+                f'description for security group {name} '
+                f'(#{gid}) does not match:\n'
+                f'expected: {description}\n'
+                f'actual: {actual}'
+            )
+        return ec2.SecurityGroup(gid)
 
 security_group = SecurityGroupTarget
 
@@ -74,15 +74,15 @@ class KeyPairTarget(AbstractTarget):
         if len(key_pairs) > 1:
             raise Exception(f'ambiguous key pair name: {name}')
 
-        # Exactly one? Return it.
-        ec2 = boto3.resource('ec2')
-        if len(key_pairs) == 1:
-            return ec2.KeyPair(name)
-
         # None? We must create it.
-        response = client.create_key_pair(KeyName=name)
-        return ec2.KeyPair(name)
-        # Can we get the key material *after* the key has been created?
+        ec2 = boto3.resource('ec2')
+        if not key_pairs:
+            response = client.create_key_pair(KeyName=name)
+            return ec2.KeyPair(name)
+            # Can we get the key material *after* the key has been created?
 
+        # Exactly one? Return it.
+        assert len(key_pairs) == 1
+        return ec2.KeyPair(name)
 
 key_pair = KeyPairTarget

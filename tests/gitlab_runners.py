@@ -3,7 +3,7 @@
 import picard
 import picard.aws as aws
 
-sg = aws.security_group('gitlab-runners', 'GitLab Runners')
+sg = aws.security_group('gitlab-runners', description='GitLab Runners')
 kp = aws.key_pair('gitlab-runners-key')
 # We need to launch an instance, install software, and then save it as a new
 # Amazon Machine Image, instead of trying to install software on every new
