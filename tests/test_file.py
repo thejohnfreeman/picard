@@ -9,7 +9,7 @@ async def test_file_returns_path(tmp_path):
     """File targets return their file's path."""
     path = tmp_path / 'output.txt'
     @picard.file(path)
-    async def output(self, context, inputs):
+    async def output(self, context, prereqs):
         # pylint: disable=unused-argument
         pass
     assert await picard.sync(output) == path
