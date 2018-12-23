@@ -5,7 +5,7 @@ lint :
 	pylint picard tests
 
 test :
-	pytest
+	pytest --cov=picard
 	@rm -f hello*
 	python tests/hello.py --help
 	python tests/hello.py
