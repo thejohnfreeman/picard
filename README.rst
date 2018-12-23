@@ -52,7 +52,7 @@ Picard has a few main components:
        """Compile an object file from a source file."""
        source = picard.file_target(source)
        @picard.file(re.sub('\\.c$', '.o', source.name), [source])
-       async def object_(context, prereqs):
+       async def object_(self, context, prereqs):
            await sh('gcc', '-c', *prereqs)
        return object_
 
@@ -63,7 +63,7 @@ Picard has a few main components:
 
    # Link all object files into one executable.
    @picard.file('hello', objects)
-   async def hello(context, prereqs):
+   async def hello(self, context, prereqs):
        await sh('gcc', '-o', 'hello', *prereqs)
 
    # Select a target on the command line, using "hello" as the default.
