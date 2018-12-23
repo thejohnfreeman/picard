@@ -55,7 +55,7 @@ def rule(prereqs: t.Collection[Target] = tuple(), target=None):
         from pathlib import Path
 
         @rule()
-        async def gitdir(context, self, prereqs):
+        async def gitdir(self, context, prereqs):
             path = Path('.git')
             if not path.is_dir():
                 picard.sh('git', 'init', '.')
