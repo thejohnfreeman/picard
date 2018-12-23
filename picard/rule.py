@@ -13,7 +13,7 @@ import typing as t
 from picard.context import Context
 from picard.typing import Target
 
-Recipe = t.Callable[[Context, Target, t.Iterable[t.Any]], t.Any]
+Recipe = t.Callable[[Target, Context, t.Iterable[t.Any]], t.Any]
 
 class RuleTarget(Target):
     """A target built from a recipe function."""
@@ -32,7 +32,7 @@ class RuleTarget(Target):
         from picard.api import sync # pylint: disable=cyclic-import
         prereqs = await sync(self.prereqs)
         context.log.info(f'start: {self.name}')
-        value = await self._recipe(context, self, prereqs)
+        value = await self._recipe(self, context, prereqs)
         context.log.info(f'finish:  {self.name}')
         return value
 

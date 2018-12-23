@@ -46,7 +46,7 @@ class FileTarget(Target):
         prereqs = await sync(self.prereqs)
         if not await self._is_up_to_date(context, prereqs):
             context.log.info(f'start: {self.name}')
-            value = await self._recipe(context, self, prereqs)
+            value = await self._recipe(self, context, prereqs)
             if value is not None:
                 context.log.warning(
                     f'discarding value returned by {self._recipe}: {value}')
@@ -104,7 +104,7 @@ def file_target(value: FileTargetLike) -> Target:
     raise Exception(f'not a target: {value}')
 
 async def _touch(
-        context: Context, target: Target, prereqs: t.Iterable[t.Any]) -> None:
+        target: Target, context: Context, prereqs: t.Iterable[t.Any]) -> None:
     # pylint: disable=unused-argument
     filename = target.name
     open(filename, 'a').close()

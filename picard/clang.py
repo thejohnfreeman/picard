@@ -20,7 +20,7 @@ def object_from_source(source):
     """Compile an object file from a source file."""
     source = file_target(source)
     @file(re.sub('\\.c$', '.o', source.name), [source])
-    async def object_(context, self, inputs):
+    async def object_(self, context, inputs):
         # pylint: disable=unused-argument
         # TODO: Move standard environment variables like CC, CXX, CFLAGS, ...
         # into :param:`context` from :func:`picard.main` and use them here.
@@ -36,7 +36,7 @@ def objects(sources):
 def executable(filename, objects):
     """Link an executable from object files."""
     @file(filename, objects)
-    async def target(context, self, inputs):
+    async def target(self, context, inputs):
         # pylint: disable=unused-argument
         await sh('gcc', '-o', self.name, *map(str, inputs))
     return target
