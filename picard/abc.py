@@ -4,16 +4,15 @@ import abc
 import typing as t
 
 from picard.context import Context
-from picard.typing import Target, TargetLike
+from picard.typing import Target
 
 class AbstractTarget(abc.ABC, Target):
     """An abstract target."""
 
     def __init__(
-            self, name: str, prereqs: t.Collection[TargetLike] = tuple()):
-        from picard.target import target # pylint: disable=cyclic-import
+            self, name: str, prereqs: t.Collection[Target] = tuple()):
         self.name = name
-        self.prereqs = [target(p) for p in prereqs]
+        self.prereqs = prereqs
 
     async def recipe(self, context: Context):
         """Build the target from its prerequisites."""

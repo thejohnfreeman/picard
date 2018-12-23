@@ -6,19 +6,21 @@ import inspect
 import logging
 import typing as t
 
+from picard.afunctor import afmap
 from picard.context import Context
-from picard.target import target
-from picard.typing import TargetLike
+from picard.typing import Target
 
 async def sync(
-        targets: t.Union[TargetLike, t.Iterable[TargetLike]],
+        target: t.Any,
         context: t.Union[Context, None] = None):
     """Swiss-army function to synchronize one or more targets.
 
     Parameters
     ----------
     targets :
-        One or more targets.
+        One or more targets. This function will recurse into functors like
+        sequences and mappings. (Remember that mappings are functors over
+        their values, not their keys.)
     context :
         An optional context. If ``None`` is passed (the default), one will be
         created for you.
@@ -29,11 +31,11 @@ async def sync(
     """
     if context is None:
         context = Context()
-    if isinstance(targets, t.Iterable):
-        return await asyncio.gather(
-            *(target(t).recipe(context) for t in targets))
-    return await target(targets).recipe(context)
-
+    async def _sync(value):
+        if isinstance(value, Target):
+            return await value.recipe(context)
+        return value
+    return await afmap(_sync, target)
 
 def main(default, rules=None):
     """Parse targets from the command line."""

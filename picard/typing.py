@@ -54,6 +54,3 @@ class Target(tex.Protocol):
     async def recipe(self, context: Context) -> t.Any:
         # pylint: disable=unused-argument,pointless-statement
         ...
-
-
-TargetLike = t.Union[Target, str]

@@ -45,12 +45,12 @@ Picard has a few main components:
 
    def source(filename):
        """Compute header file dependencies from source file."""
-       headers = [picard.target(h) for h in find_headers(filename)]
+       headers = [picard.file_target(h) for h in find_headers(filename)]
        return picard.file(filename, headers)()
 
    def object_from_source(source):
        """Compile an object file from a source file."""
-       source = picard.target(source)
+       source = picard.file_target(source)
        @picard.file(re.sub('\\.c$', '.o', source.name), [source])
        async def object_(context, inputs):
            await sh('gcc', '-c', *inputs)
