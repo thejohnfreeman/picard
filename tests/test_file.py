@@ -1,14 +1,23 @@
 """Tests for file targets."""
 
-import asyncio
+import pytest # type: ignore
 
 import picard
 
-@picard.file('output.txt')
-async def output(context, self, inputs):
-    # pylint: disable=unused-argument
-    pass
+@pytest.mark.asyncio
+async def test_file_returns_path(tmp_path):
+    """File targets return their file's path."""
+    path = tmp_path / 'output.txt'
+    @picard.file(path)
+    async def output(context, self, inputs):
+        # pylint: disable=unused-argument
+        pass
+    assert await picard.sync(output) == path
 
-
-def test_file_returns_filename():
-    assert asyncio.run(picard.sync(output)) == 'output.txt'
+@pytest.mark.asyncio
+async def test_file_default_recipe_touches_output(tmp_path):
+    """File targets have the post-condition that their file exists."""
+    path = tmp_path / 'output.txt'
+    output = picard.file(path)()
+    await picard.sync(output)
+    assert path.is_file()

@@ -1,32 +1,44 @@
-"""Make-style file targets."""
+"""Make-style file (and directory) targets."""
 
 import os
+from pathlib import Path
 import typing as t
 
 from picard.context import Context
 from picard.rule import Recipe
 from picard.typing import Target
 
-FileTargetLike = t.Union[Target, str]
+FileLike = t.Union[str, os.PathLike]
+FileTargetLike = t.Union[Target, FileLike]
+
+def is_file_like(value):
+    # For now, ``isinstance`` does not play well with ``typing.Union``.
+    # https://stackoverflow.com/a/45959000/618906
+    return isinstance(value, (str, os.PathLike))
 
 class FileTarget(Target):
     """A file that must be newer than its prerequisite files."""
 
     def __init__(
             self,
-            name: str,
+            path: Path,
             prereqs: t.Collection[FileTargetLike],
             recipe: Recipe) -> None:
-        self.name = name
+        self.path = path
         self.prereqs = [file_target(p) for p in prereqs]
         self._recipe = recipe
 
-    async def recipe(self, context: Context) -> str:
+    @property
+    def name(self) -> str: # type: ignore
+        return str(self.path)
+
+    async def recipe(self, context: Context) -> Path:
         """Conditionally rebuild this file.
 
         The conditions are (1) if this file does not exist or (2) if its
         prerequisites have changed since it was last touched.
         """
+        # TODO: Memoize value.
         # There is no way around evaluating all of the prerequisites. Either
         # (1) some have changed but we must feed them all to the recipe or (2)
         # we must check all of them to make sure none have changed.
@@ -42,7 +54,7 @@ class FileTarget(Target):
                 context.log.warning(
                     f'rule failed to update target: {self.name}')
             context.log.info(f'finish: {self.name}')
-        return self.name
+        return self.path
 
     async def _is_up_to_date(
             self, context: Context, prereqs: t.Iterable[t.Any]):
@@ -52,7 +64,7 @@ class FileTarget(Target):
             return False
 
         for prereq in prereqs:
-            if not isinstance(prereq, str):
+            if not is_file_like(prereq):
                 # Not a filename.
                 context.log.warn(
                     f'skipping non-filename dependency: {prereq}')
@@ -86,7 +98,7 @@ def file_target(value: FileTargetLike) -> Target:
     """
     if isinstance(value, Target):
         return value
-    if isinstance(value, str):
+    if is_file_like(value):
         # Treat ``value`` as a filename.
         return file(value)()
     raise Exception(f'not a target: {value}')
@@ -98,10 +110,10 @@ async def _touch(
     open(filename, 'a').close()
     os.utime(filename)
 
-def file(target: str, prereqs: t.Collection[FileTargetLike] = tuple()):
+def file(target: FileLike, prereqs: t.Collection[FileTargetLike] = tuple()):
     """A file that is newer than its prerequisite files."""
     # pylint: disable=unused-argument
     # We need the default to be touch so that the timestamp is updated.
     def decorator(recipe: Recipe = _touch):
-        return FileTarget(target, prereqs, recipe)
+        return FileTarget(Path(target), prereqs, recipe)
     return decorator

@@ -24,7 +24,7 @@ def object_from_source(source):
         # pylint: disable=unused-argument
         # TODO: Move standard environment variables like CC, CXX, CFLAGS, ...
         # into :param:`context` from :func:`picard.main` and use them here.
-        await sh('gcc', '-c', *inputs)
+        await sh('gcc', '-c', *map(str, inputs))
     return object_
 
 
@@ -38,5 +38,5 @@ def executable(filename, objects):
     @file(filename, objects)
     async def target(context, self, inputs):
         # pylint: disable=unused-argument
-        await sh('gcc', '-o', self.name, *inputs)
+        await sh('gcc', '-o', self.name, *map(str, inputs))
     return target
