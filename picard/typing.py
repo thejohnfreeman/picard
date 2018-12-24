@@ -5,6 +5,17 @@ import typing_extensions as tex
 
 from picard.context import Context
 
+# mypy does not yet support nested types, so we must use :class:`t.Any`.
+# Prerequisites = t.Union['Target', t.Iterable['Prerequisites']]
+Prerequisites = t.Any
+"""An arbitrary structure for target prerequisites.
+
+The structure can be a single target, a (possibly empty) collection of
+targets, or arbitrarily nested collections of targets. We just need a way to
+walk the structure and pull out the targets buried within, which we have with
+:func:`picard.functor.fmap` for arbitrarily nested functors.
+"""
+
 @tex.runtime
 class Target(tex.Protocol):
     """A protocol_ (i.e. structural type) for targets.
@@ -50,7 +61,7 @@ class Target(tex.Protocol):
     generally memoize their return value to avoid duplicate work.
     """
     name: str
-    prereqs: t.Collection['Target'] # pylint: disable=unsubscriptable-object
+    prereqs: Prerequisites
     async def recipe(self, context: Context) -> t.Any:
         # pylint: disable=unused-argument,pointless-statement
         ...
