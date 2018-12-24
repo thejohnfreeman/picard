@@ -6,6 +6,8 @@ import picard
 
 @pytest.mark.asyncio
 async def test_rule():
+    """Test a basic rule."""
+    # pylint: disable=unused-argument
     @picard.rule()
     async def target_1(self, context, prereqs):
         return 1

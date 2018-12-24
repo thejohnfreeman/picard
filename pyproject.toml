@@ -5,12 +5,16 @@ description = "Make it so."
 authors = ["John Freeman <jfreeman08@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 typing_extensions = "^3.6"
 boto3 = {version = "^1.9",optional = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+# A bug in pylint falsely diagnoses typing.Collection as unsubscriptable.
+# Once we update this dependency with a fix, remove the pylint disabling
+# comments sprinkled through the code on uses of typing.Collection.
+# https://github.com/PyCQA/pylint/issues/2377
 pylint = "^2.2"
 mypy = "^0.650.0"
 pydocstyle = "^3.0"

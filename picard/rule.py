@@ -21,7 +21,7 @@ class RuleTarget(Target):
     def __init__(
             self,
             name: str,
-            prereqs: t.Collection[Target],
+            prereqs: t.Collection[Target], # pylint: disable=unsubscriptable-object
             recipe: Recipe) -> None:
         self.name = name
         self.prereqs = prereqs
@@ -36,7 +36,10 @@ class RuleTarget(Target):
         context.log.info(f'finish:  {self.name}')
         return value
 
-def rule(prereqs: t.Collection[Target] = tuple(), target=None):
+def rule(
+        prereqs: t.Collection[Target] = tuple(), # pylint: disable=unsubscriptable-object
+        target=None
+):
     """Turn a recipe function into a rule.
 
     We call this decorator ``rule`` because it lets us build targets from

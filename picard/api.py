@@ -62,4 +62,9 @@ def main(default, rules=None):
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     # TODO: Build configuration.
     context = Context()
-    asyncio.run(sync(targets, context))
+    return _run(sync(targets, context))
+
+def _run(awaitable):
+    """A shim for :func:`asyncio.run` from 3.7+."""
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(awaitable)

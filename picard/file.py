@@ -22,7 +22,7 @@ class FileTarget(Target):
     def __init__(
             self,
             path: Path,
-            prereqs: t.Collection[FileTargetLike],
+            prereqs: t.Collection[FileTargetLike], # pylint: disable=unsubscriptable-object
             recipe: Recipe) -> None:
         self.path = path
         self.prereqs = [file_target(p) for p in prereqs]
@@ -110,7 +110,10 @@ async def _touch(
     open(filename, 'a').close()
     os.utime(filename)
 
-def file(target: FileLike, prereqs: t.Collection[FileTargetLike] = tuple()):
+def file(
+        target: FileLike,
+        prereqs: t.Collection[FileTargetLike] = tuple() # pylint: disable=unsubscriptable-object
+):
     """A file that is newer than its prerequisite files."""
     # pylint: disable=unused-argument
     # We need the default to be touch so that the timestamp is updated.
