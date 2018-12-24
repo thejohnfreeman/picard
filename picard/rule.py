@@ -33,7 +33,7 @@ class RuleTarget(Target):
         prereqs = await sync(self.prereqs)
         context.log.info(f'start: {self.name}')
         value = await self._recipe(self, context, prereqs)
-        context.log.info(f'finish:  {self.name}')
+        context.log.info(f'finish: {self.name}')
         return value
 
 def rule(
