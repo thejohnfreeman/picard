@@ -13,7 +13,7 @@ import typing as t
 from picard.context import Context
 from picard.typing import Target
 
-Recipe = t.Callable[[Target, Context, t.Iterable[t.Any]], t.Any]
+Recipe = t.Callable[[Target, Context, t.Any], t.Any]
 
 class RuleTarget(Target):
     """A target built from a recipe function."""
