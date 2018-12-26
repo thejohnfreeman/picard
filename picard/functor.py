@@ -20,7 +20,7 @@ def _fmap_generator(function, xs):
         yield fmap(function, x)
 
 def _fmap_iterable(function, iterable):
-    return type(iterable)(function(x) for x in iterable)
+    return type(iterable)(fmap(function, x) for x in iterable)
 
 def _fmap_mapping(function, mapping):
     values = _fmap_generator(function, mapping.values())

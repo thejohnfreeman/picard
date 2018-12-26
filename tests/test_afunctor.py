@@ -44,3 +44,8 @@ async def test_afmap_tuple():
 @pytest.mark.asyncio
 async def test_dict_of_list():
     assert await afmap(times2, {'xs': [1, 2, 3]}) == {'xs': [2, 4, 6]}
+
+@pytest.mark.asyncio
+async def test_args_and_kwargs():
+    actual = await afmap(times2, ((1, 2), {'xs': [3, 4]}))
+    assert actual == ((2, 4), {'xs': [6, 8]})

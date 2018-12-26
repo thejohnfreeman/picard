@@ -33,3 +33,6 @@ def test_fmap_tuple():
 
 def test_dict_of_list():
     assert fmap(times2, {'xs': [1, 2, 3]}) == {'xs': [2, 4, 6]}
+
+def test_args_and_kwargs():
+    assert fmap(times2, ((1, 2), {'xs': [3, 4]})) == ((2, 4), {'xs': [6, 8]})

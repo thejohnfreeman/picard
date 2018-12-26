@@ -32,7 +32,7 @@ async def _afmap_generator(function, xs):
     return generator()
 
 async def _afmap_iterable(function, iterable):
-    ys = await asyncio.gather(*(function(x) for x in iterable))
+    ys = await asyncio.gather(*(afmap(function, x) for x in iterable))
     return type(iterable)(ys)
 
 async def _afmap_mapping(function, mapping):
@@ -56,9 +56,7 @@ _IMPLEMENTATIONS = {
     tuple: _afmap_iterable,
 }
 
-_NO_ARGUMENT = object()
-
-async def afmap(function: t.Callable, functor=_NO_ARGUMENT):
+async def afmap(function: t.Callable, functor):
     """Recursively apply an asynchronous function within a functor.
 
     By "recursive", we mean if a functor is nested, even with different types,
