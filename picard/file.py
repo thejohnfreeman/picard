@@ -16,6 +16,9 @@ def is_file_like(value):
     # https://stackoverflow.com/a/45959000/618906
     return isinstance(value, (str, os.PathLike))
 
+class FileRecipePostConditionError(Exception):
+    """Raised when a file recipe fails to update its target."""
+
 class FileTarget(Target):
     """A file that must be newer than its prerequisite files."""
 
@@ -47,12 +50,11 @@ class FileTarget(Target):
         if not await self._is_up_to_date(context, prereqs):
             context.log.info(f'start: {self.name}')
             value = await self._recipe(self, context, prereqs)
-            if value is not None:
+            if value is not None and value != self.path:
                 context.log.warning(
                     f'discarding value returned by {self._recipe}: {value}')
             if not await self._is_up_to_date(context, prereqs):
-                context.log.warning(
-                    f'rule failed to update target: {self.name}')
+                raise FileRecipePostConditionError(self.name)
             context.log.info(f'finish: {self.name}')
         return self.path
 
