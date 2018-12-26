@@ -16,7 +16,7 @@ async def test_raises_error_when_file_not_created(tmp_path):
     """File targets must update their file."""
     path = tmp_path / 'output.txt'
     @picard.file(path)
-    async def output(self, context, prereqs): # pylint: disable=unused-argument
+    async def output(self, context): # pylint: disable=unused-argument
         """This rule does not touch its target."""
     with pytest.raises(picard.FileRecipePostConditionError):
         await picard.sync(output)

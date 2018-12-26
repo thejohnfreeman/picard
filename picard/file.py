@@ -23,10 +23,8 @@ class FileTarget(Target):
     """A file that must be newer than its prerequisite files."""
 
     def __init__(
-            self,
-            path: Path,
-            prereqs: t.Collection[FileTargetLike], # pylint: disable=unsubscriptable-object
-            recipe: Recipe) -> None:
+            self, path: Path, recipe: Recipe, *prereqs: FileTargetLike,
+    ) -> None:
         self.path = path
         self.prereqs = [file_target(p) for p in prereqs]
         self._recipe = recipe
@@ -49,7 +47,7 @@ class FileTarget(Target):
         prereqs = await sync(self.prereqs)
         if not await self._is_up_to_date(context, prereqs):
             context.log.info(f'start: {self.name}')
-            value = await self._recipe(self, context, prereqs)
+            value = await self._recipe(self, context, *prereqs)
             if value is not None and value != self.path:
                 context.log.warning(
                     f'discarding value returned by {self._recipe}: {value}')
@@ -59,7 +57,8 @@ class FileTarget(Target):
         return self.path
 
     async def _is_up_to_date(
-            self, context: Context, prereqs: t.Iterable[t.Any]):
+            self, context: Context, prereqs: t.Iterable[t.Any]
+    ) -> bool:
         try:
             mtime = os.stat(self.name).st_mtime
         except FileNotFoundError:
@@ -105,20 +104,16 @@ def file_target(value: FileTargetLike) -> Target:
         return file(value)()
     raise Exception(f'not a target: {value}')
 
-async def _touch(
-        target: Target, context: Context, prereqs: t.Iterable[t.Any]) -> None:
+async def _touch(target: Target, context: Context, *prereqs) -> None:
     # pylint: disable=unused-argument
     filename = target.name
     open(filename, 'a').close()
     os.utime(filename)
 
-def file(
-        target: FileLike,
-        prereqs: t.Collection[FileTargetLike] = tuple() # pylint: disable=unsubscriptable-object
-):
+def file(target: FileLike, *prereqs: FileTargetLike):
     """A file that is newer than its prerequisite files."""
     # pylint: disable=unused-argument
     # We need the default to be touch so that the timestamp is updated.
     def decorator(recipe: Recipe = _touch):
-        return FileTarget(Path(target), prereqs, recipe)
+        return FileTarget(Path(target), recipe, *prereqs)
     return decorator
