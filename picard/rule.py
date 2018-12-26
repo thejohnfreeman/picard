@@ -11,35 +11,12 @@ decorator to do just that, and it constructs an instance of
 import typing as t
 
 from picard.context import Context
+from picard.pattern import PatternTarget
 from picard.typing import Target
 
 Recipe = t.Callable[[Target, Context, t.Any], t.Any]
 
-class RuleTarget(Target):
-    """A target built from a recipe function."""
-
-    def __init__(
-            self,
-            name: str,
-            prereqs: t.Collection[Target], # pylint: disable=unsubscriptable-object
-            recipe: Recipe) -> None:
-        self.name = name
-        self.prereqs = prereqs
-        self._recipe = recipe
-
-    async def recipe(self, context: Context):
-        # TODO: Memoize value.
-        from picard.api import sync # pylint: disable=cyclic-import
-        prereqs = await sync(self.prereqs)
-        context.log.info(f'start: {self.name}')
-        value = await self._recipe(self, context, prereqs)
-        context.log.info(f'finish: {self.name}')
-        return value
-
-def rule(
-        prereqs: t.Collection[Target] = tuple(), # pylint: disable=unsubscriptable-object
-        target=None
-):
+def rule(*args, **kwargs):
     """Turn a recipe function into a rule.
 
     We call this decorator ``rule`` because it lets us build targets from
@@ -65,9 +42,6 @@ def rule(
             return path
     """
     # pylint: disable=unused-argument
-    def decorator(function: Recipe):
-        nonlocal target
-        if target is None:
-            target = function.__name__
-        return RuleTarget(target, prereqs, function)
+    def decorator(recipe: Recipe):
+        return PatternTarget(recipe.__name__, recipe, *args, **kwargs)
     return decorator

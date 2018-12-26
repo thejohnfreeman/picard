@@ -37,44 +37,36 @@ parameters than the recipe you supplied for the pattern:
     example_o = object_file('example.o', source='example.c')
 """
 
-import abc
 import typing as t
 
 from picard.context import Context
 from picard.typing import Target
 
-class AbstractPatternTarget(abc.ABC, Target):
-    """An abstract pattern.
+Recipe = t.Any
 
-    Every pattern is a subclass of this class, which is only missing
-    a :meth:`_recipe` method.
-    """
+class PatternTarget(Target):
+    """A template for rules, a.k.a. :class:`Target`s."""
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name: str, recipe: Recipe, *args, **kwargs) -> None:
         self.name = name
         self.prereqs = (args, kwargs)
+        self._recipe = recipe
+        if recipe.__doc__:
+            self.__doc__ = recipe.__doc__
 
     async def recipe(self, context: Context) -> t.Any:
         # TODO: Memoize value.
         from picard.api import sync # pylint: disable=cyclic-import
         args, kwargs = await sync(self.prereqs)
         context.log.info(f'start: {self.name}')
-        value = await self._recipe(context, *args, **kwargs)
+        value = await self._recipe(self, context, *args, **kwargs)
         context.log.info(f'finish: {self.name}')
         return value
-
-    @abc.abstractmethod
-    async def _recipe(self, context: Context, *args, **kwargs) -> t.Any:
-        # pylint: disable=pointless-statement
-        ...
-
-_DEFAULT_DOCSTRING = """A template for rules, a.k.a. :class:`Target`s."""
 
 def pattern():
     """Turn a recipe function into a pattern."""
     def decorator(recipe):
-        class PatternTarget(AbstractPatternTarget):
-            __doc__ = recipe.__doc__ or _DEFAULT_DOCSTRING
-            _recipe = recipe
-        return PatternTarget
+        def constructor(*args, **kwargs):
+            return PatternTarget(recipe.__name__, recipe, *args, **kwargs)
+        return constructor
     return decorator

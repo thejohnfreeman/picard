@@ -1,5 +1,13 @@
 (Try to come up with some benchmarks and test.)
 
+Refactor @rules to use PatternTarget:
+
+- Use type :class:`typing.Any` for :class:`picard.pattern.Recipe`.
+- :func:`pattern` returns a function, not a class.
+- PatternTarget takes its :prop:`_recipe` in constructor.
+- :func:`rule` instantiates a :class:`PatternTarget`
+- Try to refine :class:`picard.pattern.Recipe`.
+
 Treat args and kwargs as ``Functor[Target]``.
 Want to be able to define factories like this:
 
@@ -22,6 +30,7 @@ Want to be able to define factories like this:
 
 Fix documentation with this progression:
 
+- Target
 - @rule
 - @pattern
 - @file
