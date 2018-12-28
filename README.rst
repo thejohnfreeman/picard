@@ -34,6 +34,9 @@ builds the abstract definitions of the targets and gets to leverage functions
 and variables. Picard tries to combine the best of both worlds in pure Python.
 
 
+.. contents::
+
+
 Concepts
 ========
 
