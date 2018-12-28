@@ -1,7 +1,7 @@
 """Picard combines the idea of Ansible with the execution of Make."""
 
 # I'm only slightly worried about the rebindings of ``file`` and ``rule``...
-from picard.api import main, sync
+from picard.api import make, sync
 from picard.context import Context
 from picard.file import (
     FileRecipePostConditionError, FileTarget, file, file_target

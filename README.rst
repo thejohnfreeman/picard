@@ -219,26 +219,26 @@ properties: an empty configuration named ``config``, and a logger (the root
 logger from the ``logging`` module) named ``log``.
 
 
-main
+make
 ~~~~
 
 .. code-block:: python
 
-    main(
+    make(
         target: Target,
         config: Mapping[str, Any] = {},
         rules: Mapping[str, Target] = None,
     )
 
-A command line interface similar to Make_. ``main`` takes a few parameters:
+A command line interface similar to Make_. ``make`` takes a few parameters:
 
 1. ``target``: The default target to synchronize. In Make, this would be the
    first declared target. With Picard, you must pass it.
 2. ``config``: The default configuration, a mapping from strings to values.
 3. ``rules``: The set of known rules. If not given, it will default to the set
-   of variables in the module from which ``main`` was called.
+   of variables in the module from which ``make`` was called.
 
-``main`` takes a few steps:
+``make`` takes a few steps:
 
 1. It parses the command line for options of the form ``name=value`` or
    ``--name value``, and then considers the rest of the command line
@@ -252,7 +252,7 @@ A command line interface similar to Make_. ``main`` takes a few parameters:
    none were found, the default ``target``), and then synchronizes them all
    with the context built in step 3.
 
-``main`` is meant to be used like this:
+``make`` is meant to be used like this:
 
 .. code-block:: python
 
@@ -262,7 +262,7 @@ A command line interface similar to Make_. ``main`` takes a few parameters:
     target = ...
 
     if __name__ == '__main__':
-        picard.main(target)
+        picard.make(target)
 
 
 Batteries
@@ -307,7 +307,7 @@ Example
 
    # Select a target on the command line, using "hello" as the default.
    if __name__ == '__main__':
-       picard.main(hello)
+       picard.make(hello)
 
 
 Help

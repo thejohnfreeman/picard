@@ -15,7 +15,7 @@ def object_from_source(source):
     async def object_(self, context, source, *headers):
         # pylint: disable=unused-argument
         # TODO: Move standard environment variables like CC, CXX, CFLAGS, ...
-        # into :param:`context` from :func:`picard.main` and use them here.
+        # into :param:`context` from :func:`picard.make` and use them here.
         await sh('gcc', '-c', str(source))
     return object_
 

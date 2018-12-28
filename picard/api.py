@@ -1,12 +1,13 @@
 """The rest of the public API."""
 
-import argparse
 import asyncio
 import inspect
 import logging
+import os
 import typing as t
 
 from picard.afunctor import afmap
+from picard.argparse import parse_args
 from picard.context import Context
 from picard.typing import Target
 
@@ -38,8 +39,14 @@ async def sync(target: Targets, context: Context = None):
         return value
     return await afmap(_sync, target)
 
-def main(default: Targets, rules: t.Mapping[str, Target] = None):
+def make(
+        target: Targets,
+        config: t.Mapping[str, t.Any] = None,
+        rules: t.Mapping[str, Target] = None,
+):
     """Parse targets from the command line."""
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+
     if rules is None:
         stack = inspect.stack()
         module = inspect.getmodule(stack[0].frame)
@@ -49,21 +56,20 @@ def main(default: Targets, rules: t.Mapping[str, Target] = None):
                 'you must pass the "rules" argument')
         rules = vars(module)
 
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('targets', nargs='*')
-    args = parser.parse_args()
+    targets, overrides = parse_args()
 
-    targets = (
-        [default]
-        if args.targets == [] else
-        [rules[t] for t in args.targets]
+    targets_ = (
+        [target]
+        if not targets else
+        [rules[t] for t in targets]
     )
 
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    # TODO: Build configuration.
-    context = Context()
-    return _run(sync(targets, context))
+    config = {} if config is None else dict(config)
+    config.update(os.environ)
+    config.update(overrides)
+    context = Context(config=config)
+
+    return _run(sync(targets_, context))
 
 def _run(awaitable):
     """A shim for :func:`asyncio.run` from 3.7+."""

@@ -27,4 +27,4 @@ objects = clang.objects(*sources)
 hello = clang.executable('hello', *objects)
 
 if __name__ == '__main__':
-    picard.main(hello)
+    picard.make(hello)
