@@ -1,12 +1,4 @@
-"""Turn a named function into a :class:`Target`.
-
-A target is a combination of a name, a set of prerequisites, and an (async)
-recipe function. Because every async function in Python has a name, we just
-need to add a set of prerequisites to make a rule, which we can do with
-a decorator much easier than defininig a class. :func:`rule` is a function
-decorator to do just that, and it constructs an instance of
-:class:`RuleTarget`.
-"""
+"""Turn a named function into a :class:`Target`."""
 
 import typing as t
 
@@ -35,7 +27,7 @@ def rule(*args, **kwargs):
         from pathlib import Path
 
         @rule()
-        async def gitdir(self, context, prereqs):
+        async def gitdir(context):
             path = Path('.git')
             if not path.is_dir():
                 picard.sh('git', 'init', '.')
@@ -43,5 +35,7 @@ def rule(*args, **kwargs):
     """
     # pylint: disable=unused-argument
     def decorator(recipe: Recipe):
-        return PatternTarget(recipe.__name__, recipe, *args, **kwargs)
+        async def selfless_recipe(self, context, *args, **kwargs):
+            return await recipe(context, *args, **kwargs)
+        return PatternTarget(recipe.__name__, selfless_recipe, *args, **kwargs)
     return decorator

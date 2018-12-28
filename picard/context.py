@@ -1,14 +1,9 @@
-"""Context shared through the dependency graph.
-
-Context makes it possible to pass information "up" the dependency graph (or
-"down", depending on your perspective), from targets to prerequisites. It
-generally carries a configuration and a shared logger.
-"""
+"""Context shared through the dependency graph."""
 
 import logging
 import typing as t
 
 class Context:
-    """For now, this is just a placeholder."""
-
-    log: t.Any = logging
+    """A configuration mapping and a logger."""
+    config: t.Mapping[str, t.Any] = {}
+    log: logging.Logger = logging.getLogger()

@@ -10,9 +10,10 @@ from picard.afunctor import afmap
 from picard.context import Context
 from picard.typing import Target
 
-async def sync(
-        target: t.Any,
-        context: t.Union[Context, None] = None):
+# Targets = Traversable[Target]
+Targets = t.Any
+
+async def sync(target: Targets, context: Context = None):
     """Swiss-army function to synchronize one or more targets.
 
     Parameters
@@ -37,7 +38,7 @@ async def sync(
         return value
     return await afmap(_sync, target)
 
-def main(default, rules=None):
+def main(default: Targets, rules: t.Mapping[str, Target] = None):
     """Parse targets from the command line."""
     if rules is None:
         stack = inspect.stack()
