@@ -6,27 +6,24 @@ from picard.context import Context
 from picard.pattern import PatternTarget
 from picard.typing import Target
 
-Recipe = t.Callable[[Target, Context, t.Any], t.Any]
+# Need a way to type *args and **kwargs without ignoring the known parameters.
+Recipe = t.Callable[[Context, t.Any], t.Awaitable[t.Any]]
 
-def rule(*args, **kwargs):
-    """Turn a recipe function into a rule.
+def rule(*args, **kwargs) -> t.Callable[[Recipe], Target]:
+    """Turn a recipe function into a target.
 
-    We call this decorator ``rule`` because it lets us build targets from
-    recipe functions with a syntax that mimics Make.
-
-    Parameters
-    ----------
-    prereqs :
-        A set of prerequisite targets.
-    target :
-        A name for the target of this recipe. If ``None`` (the default), the
-        name of the recipe function will be used.
+    The parameters are the prerequisites, which will be passed, evaluated, to
+    the recipe.
 
     Example
     -------
-        from pathlib import Path
 
-        @rule()
+    .. code-block:: python
+
+        from pathlib import Path
+        import picard
+
+        @picard.rule()
         async def gitdir(context):
             path = Path('.git')
             if not path.is_dir():

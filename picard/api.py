@@ -24,12 +24,13 @@ async def sync(target: Targets, context: Context = None):
         sequences and mappings. (Remember that mappings are functors over
         their values, not their keys.)
     context :
-        An optional context. If ``None`` is passed (the default), one will be
-        created for you.
+        An optional context. If ``None`` is passed (the default), an empty one
+        will be created for you.
 
     Returns
     -------
-    The value(s) of the targets.
+    Traversable[Any]
+        The value(s) of the targets in the same functor.
     """
     if context is None:
         context = Context()
@@ -44,7 +45,7 @@ def make(
         config: t.Mapping[str, t.Any] = None,
         rules: t.Mapping[str, Target] = None,
 ):
-    """Parse targets from the command line."""
+    """Parse targets and configuration from the command line."""
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
     if rules is None:

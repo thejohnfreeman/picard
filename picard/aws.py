@@ -1,10 +1,10 @@
-"""Batteries for Amazon Web Services.
+"""Patterns for Amazon Web Services resources.
 
-The targets in this module correspond to AWS resources, e.g. an EC2 instance or
-an S3 bucket. That is, their post-condition asserts that the resource exists
-with the given parameters. Each target is requires *at least* the parameters
-necessary to create the resource. These parameters should be enough to
-identify the resource in a search.
+The patterns in this module correspond to AWS resources, e.g. an EC2 instance
+or an S3 bucket. That is, their post-condition asserts that the resource
+exists with the given parameters. Each target requires *at least* the
+parameters necessary to create the resource. These parameters should be enough
+to identify the resource in a search.
 """
 
 import boto3 # type: ignore

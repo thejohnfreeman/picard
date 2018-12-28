@@ -5,11 +5,15 @@ from pathlib import Path
 import typing as t
 
 from picard.context import Context
-from picard.rule import Recipe
 from picard.typing import Target
 
 FileLike = t.Union[str, os.PathLike]
 FileTargetLike = t.Union[Target, FileLike]
+# Need a way to type *args and **kwargs without ignoring the known parameters.
+Recipe = t.Callable[
+    [Target, Context, t.Any],
+    t.Awaitable[t.Union[None, Path]],
+]
 
 def is_file_like(value):
     # For now, ``isinstance`` does not play well with ``typing.Union``.
@@ -104,16 +108,12 @@ def file_target(value: FileTargetLike) -> Target:
         return file(value)()
     raise Exception(f'not a target: {value}')
 
-async def _touch(target: Target, context: Context, *prereqs) -> None:
-    # pylint: disable=unused-argument
-    filename = target.name
-    open(filename, 'a').close()
-    os.utime(filename)
+async def _noop(*args, **kwargs) -> None: # pylint: disable=unused-argument
+    """A function that does nothing."""
 
 def file(target: FileLike, *prereqs: FileTargetLike):
     """A file that is newer than its prerequisite files."""
     # pylint: disable=unused-argument
-    # We need the default to be touch so that the timestamp is updated.
-    def decorator(recipe: Recipe = _touch):
+    def decorator(recipe: Recipe = _noop):
         return FileTarget(Path(target), recipe, *prereqs)
     return decorator
