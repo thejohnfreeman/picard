@@ -9,6 +9,10 @@ Make it so.
 
 .. image:: https://travis-ci.org/thejohnfreeman/picard.svg?branch=master
    :target: https://travis-ci.org/thejohnfreeman/picard
+   :alt: Build Status
+.. image:: https://readthedocs.org/projects/picard/badge/?version=latest
+   :target: https://picard.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 The idea of Ansible_ with the execution of Make_.
 
