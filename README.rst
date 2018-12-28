@@ -46,6 +46,10 @@ and variables. Picard tries to combine the best of both worlds in pure Python.
 Help
 ====
 
+Please see the documentation on `Read the Docs`_.
+
+.. _`Read the Docs`: https://picard.readthedocs.io
+
 If you have any questions, please ask me_ in the issues_, by email_, over
 Twitter_, or however you want to reach me. I'll be happy to help you, because
 it will help me make this documentation better for the next reader.
