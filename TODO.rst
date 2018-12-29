@@ -1,5 +1,3 @@
-Build configuration in context from defaults < environment < command line.
-
 Memoize results.
 
 Try to refine :class:`picard.pattern.Recipe`.
