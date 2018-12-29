@@ -16,7 +16,8 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.6"
 typing_extensions = "^3.6"
-boto3 = {version = "^1.9",optional = true}
+boto3 = {version = "^1.9", optional = true}
+tabulate = {version = "^0.8.2", optional = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
@@ -35,7 +36,7 @@ sphinx_rtd_theme = "^0.4.2"
 toml = "^0.10.0"
 
 [tool.poetry.extras]
-aws = ["boto3"]
+aws = ["boto3", "tabulate"]
 
 [build-system]
 requires = ["poetry>=0.12"]

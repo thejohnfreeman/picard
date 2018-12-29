@@ -10,6 +10,7 @@ setup(
     packages=['picard'],
     install_requires=[
         'boto3>=1.9,<1.10',
+        'tabulate>=0.8,<0.9',
         'toml>=0.10,<0.11',
         'typing_extensions>=3.6,<3.7',
     ],

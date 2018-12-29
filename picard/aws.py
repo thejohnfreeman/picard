@@ -5,17 +5,30 @@ or an S3 bucket. That is, their post-condition asserts that the resource
 exists with the given parameters. Each target requires *at least* the
 parameters necessary to create the resource. These parameters should be enough
 to identify the resource in a search.
+
+.. note:: All parameters for these patterns must be keyword arguments.
 """
 
+import typing as t
+
 import boto3 # type: ignore
+# Types coming soon: https://github.com/python/typeshed/pull/2384
+from tabulate import tabulate # type: ignore
 
 from picard.context import Context
 from picard.pattern import pattern
+from picard.typing import Target
 
 @pattern()
-async def security_group(self, context: Context, description: str = ''):
-    """An AWS security group."""
-    name = self.name
+async def security_group(target: Target, context: Context, **kwargs):
+    """An AWS security group.
+
+    Parameters
+    ----------
+    Description : str
+    """
+    # pylint: disable=unused-argument
+    name = target.name
 
     # Search for the security group by name.
     client = boto3.client('ec2')
@@ -24,36 +37,55 @@ async def security_group(self, context: Context, description: str = ''):
 
     # More than one? Ambiguous.
     if len(groups) > 1:
-        # TODO: Set the description.
         raise Exception(f'ambiguous security group name: {name}')
 
     # None? We must create it.
     ec2 = boto3.resource('ec2')
     if not groups:
-        response = client.create_security_group(
-            GroupName=name,
-            Description=description)
+        response = client.create_security_group(GroupName=name, **kwargs)
         return ec2.SecurityGroup(response['GroupId'])
 
     # Exactly one? Check for differences, then return it.
     assert len(groups) == 1
     group = groups[0]
     gid = group['GroupId']
-    actual = group['Description']
-    if actual != description:
-        context.log.warning(
-            f'description for security group {name} '
-            f'(#{gid}) does not match:\n'
-            f'expected: {description}\n'
-            f'actual: {actual}'
-        )
+    diffs = {
+        key: (expected, actual)
+        for key, expected in kwargs.items()
+        for actual in (group[key],)
+        if actual != expected
+    }
+    if diffs:
+        raise DifferenceError('Security Group', gid, diffs)
     return ec2.SecurityGroup(gid)
 
+class DifferenceError(Exception):
+    """An exception for unexpected differences."""
+
+    def __init__(
+            self,
+            type_: str,
+            id_: str,
+            diffs: t.Mapping[str, t.Tuple[t.Any, t.Any]],
+    ) -> None:
+        super().__init__()
+        self.type = type_
+        self.id = id_
+        self.diffs = diffs
+
+    def __str__(self) -> str:
+        rows = [
+            (key, repr(expected), repr(actual))
+            for key, (expected, actual) in self.diffs.items()
+        ]
+        table = tabulate(rows, headers=('Value', 'Expected', 'Actual'))
+        return f'{self.type} #{self.id}\n{table}'
+
 @pattern()
-async def key_pair(self, context: Context):
+async def key_pair(target: Target, context: Context):
     """An AWS key pair."""
     # pylint: disable=unused-argument
-    name = self.name
+    name = target.name
 
     # Search for the key pair by name.
     client = boto3.client('ec2')

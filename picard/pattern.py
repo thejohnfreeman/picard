@@ -50,8 +50,8 @@ def pattern() -> t.Callable[[Recipe], t.Callable[..., Target]]:
     """
     def decorator(recipe):
         @_wraps(recipe)
-        def constructor(*args, **kwargs):
-            return PatternTarget(recipe.__name__, recipe, *args, **kwargs)
+        def constructor(name, *args, **kwargs):
+            return PatternTarget(name, recipe, *args, **kwargs)
         return constructor
     return decorator
 

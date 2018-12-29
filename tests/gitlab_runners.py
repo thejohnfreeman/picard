@@ -5,7 +5,7 @@ import picard.aws as aws
 
 # pylint: disable=no-value-for-parameter
 
-sg = aws.security_group('gitlab-runners', description='GitLab Runners')
+sg = aws.security_group('gitlab-runners', Description='GitLab Runners')
 kp = aws.key_pair('gitlab-runners-key')
 
 # We need to launch an instance, install software, and then save it as a new
