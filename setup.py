@@ -6,7 +6,7 @@
 from setuptools import setup
 setup(
     name='picard',
-    version='0.1.1',
+    version='0.1.2',
     packages=['picard'],
     install_requires=[
         'boto3>=1.9,<1.10',

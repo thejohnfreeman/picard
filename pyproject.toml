@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "picard.py"
-version = "0.1.1"
+version = "0.1.2"
 description = "Make it so."
 authors = ["John Freeman <jfreeman08@gmail.com>"]
 packages = [{ include = 'picard' }]
