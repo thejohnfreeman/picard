@@ -1,5 +1,6 @@
-Picard: Make it so
-==================
+======
+Picard
+======
 
 .. include:: ../README.rst
    :start-after: start-include

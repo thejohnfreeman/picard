@@ -1,11 +1,13 @@
 ======
 picard
 ======
------------
-Make it so.
------------
 
 .. start-include
+..
+
+    *"Make it so."* -- `Captain Jean-Luc Picard`_
+
+.. _`Captain Jean-Luc Picard`: https://www.youtube.com/watch?v=FaLyasJPyUU
 
 .. image:: https://travis-ci.org/thejohnfreeman/picard.svg?branch=master
    :target: https://travis-ci.org/thejohnfreeman/picard
