@@ -9,10 +9,19 @@ Make it so.
 
 .. image:: https://travis-ci.org/thejohnfreeman/picard.svg?branch=master
    :target: https://travis-ci.org/thejohnfreeman/picard
-   :alt: Build Status
+   :alt: Build status
+
 .. image:: https://readthedocs.org/projects/picard/badge/?version=latest
    :target: https://picard.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+   :alt: Documentation status
+
+.. image:: https://img.shields.io/pypi/v/picard.py.svg
+   :target: https://pypi.org/project/picard.py/
+   :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/picard.py.svg
+   :target: https://pypi.org/project/picard.py/
+   :alt: Python versions supported
 
 The idea of Ansible_ with the execution of Make_.
 
